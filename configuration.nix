@@ -20,6 +20,7 @@ in
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      <home-manager/nixos>
     ];
 
   # Bootloader.
@@ -148,14 +149,15 @@ in
     #  thunderbird
     ];
   };
+  
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+  # Home Manager Configuration (Most of/if not all your apps should go in here)  
+  home-manager.useGlobalPkgs = true;
+  home-manager.users.cody = { pkgs, ... }: {
+    home.packages = with pkgs; [
+    atool 
+    httpie
+    vim 
     emacs-gtk
     floorp
     rustup
@@ -169,6 +171,21 @@ in
     flameshot
     git
     wget
+    ];
+    programs.bash.enable = true;
+    # The state version is required and should stay at the version you
+    # originally installed.
+    home.stateVersion = "23.11";
+  };
+
+
+
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
+
+  # List packages installed in system profile. To search, run:
+  # $ nix search wget
+  environment.systemPackages = with pkgs; [
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
