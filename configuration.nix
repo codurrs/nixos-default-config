@@ -62,7 +62,7 @@ in
     open = false;
 
     # Enable the Nvidia settings menu,
-	# accessible via `nvidia-settings`.
+        # accessible via `nvidia-settings`.
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
@@ -70,6 +70,10 @@ in
   };  
   
   # END OF NVIDIA ------------------------------------------------------------------------
+  # Using Xwayland to make flickering in certain apps due to nvidia go away
+  programs.xwayland.enable = true;
+
+
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -141,9 +145,6 @@ in
     description = "Cody Rouse";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = [
-      kate
-      neovim
-      
     #  thunderbird
     ];
   };
@@ -155,8 +156,19 @@ in
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  wget
-  floorp
+    emacs-gtk
+    floorp
+    rustup
+    calibre
+    kate
+    neovim
+    steam
+    logseq
+    spotify
+    weylus
+    flameshot
+    git
+    wget
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -170,7 +182,7 @@ in
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  services.openssh.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
