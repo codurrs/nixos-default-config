@@ -5,7 +5,9 @@
 { config, lib, pkgs, ... }:
 
 
-# The following code before the "in" here lets me use unstable/stable for packages
+# The following code before the "in" here lets me use unstable/stable for packages, however
+# the main channel is the "unstable" channel because it isn't that unstable by default according to me.
+# adding the "stable" before packages that are glitchy may help.
 let
   stable = import
     (builtins.fetchTarball https://github.com/nixos/nixpkgs/tarball/nixos-23.11)
@@ -74,7 +76,11 @@ in
   # Using Xwayland to make flickering in certain apps due to nvidia go away
   programs.xwayland.enable = true;
 
+  # Fixing spotify glitches by enabling native wayland support for most electron apps (Spotify, vscode)
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
+  # Fix cursor not showing in Hyprland and Sway
+  environment.sessionVariables.WLR_NO_HARDWARE_CURSORS = "1";
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -111,6 +117,10 @@ in
   services.xserver.displayManager.sddm.enable = true;
   services.xserver.desktopManager.plasma6.enable = true;
 
+  # Extra window managers:
+  programs.hyprland.enable = true;
+
+  
   # Configure keymap in X11
   services.xserver = {
     xkb.layout = "us";
@@ -155,22 +165,41 @@ in
   home-manager.useGlobalPkgs = true;
   home-manager.users.cody = { pkgs, ... }: {
     home.packages = with pkgs; [
+    
+    waybar
+    swww
+    waypaper
+    wofi
+    kitty
+
+    trilium-desktop
+    anki
+    cemu-ti
+    speedcrunch
+    mesa
+    xournalpp
+    vimPlugins.nvim-web-devicons
+    clang-tools_17
+    gccgo13
+    lunarvim
+    nerdfonts
+    go
+    prismlauncher-qt5
+    wl-clipboard
     atool 
     httpie
     vim 
     emacs-gtk
     floorp
-    rustup
     calibre
     kate
     neovim
     steam
-    logseq
     spotify
     weylus
     flameshot
-    git
     wget
+    
     ];
     programs.bash.enable = true;
     # The state version is required and should stay at the version you
@@ -179,13 +208,23 @@ in
   };
 
 
-
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    
+    # These are global packages, change them to user package if they act up.
+    git
+    gnumake
+    python312
+    python312Packages.pip
+    nodejs_21
+    ripgrep
+    go
+    nerdfonts
+    rustup
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
