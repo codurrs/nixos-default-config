@@ -47,7 +47,7 @@ in
 
     # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
     # Enable this if you have graphical corruption issues or application crashes after waking
-    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead 
+    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead
     # of just the bare essentials.
     powerManagement.enable = false;
 
@@ -57,9 +57,9 @@ in
 
     # Use the NVidia open source kernel module (not to be confused with the
     # independent third-party "nouveau" open source driver).
-    # Support is limited to the Turing and later architectures. Full list of 
-    # supported GPUs is at: 
-    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
+    # Support is limited to the Turing and later architectures. Full list of
+    # supported GPUs is at:
+    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus
     # Only available from driver 515.43.04+
     # Currently alpha-quality/buggy, so false is currently the recommended setting.
     open = false;
@@ -70,8 +70,8 @@ in
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
     package = config.boot.kernelPackages.nvidiaPackages.stable;
-  };  
-  
+  };
+
   # END OF NVIDIA ------------------------------------------------------------------------
   # Using Xwayland to make flickering in certain apps due to nvidia go away
   programs.xwayland.enable = true;
@@ -115,13 +115,9 @@ in
 
   # Enable the KDE Plasma Desktop Environment.
   services.xserver.displayManager.sddm.enable = true;
-  services.xserver.desktopManager.plasma6.enable = true;
+  services.desktopManager.plasma6.enable = true;
 
-  # Extra window managers:
-  programs.hyprland.enable = true;
-
-  
-  # Configure keymap in X11
+ # Configure keymap in X11
   services.xserver = {
     xkb.layout = "us";
     xkb.variant = "";
@@ -159,18 +155,24 @@ in
     #  thunderbird
     ];
   };
-  
 
-  # Home Manager Configuration (Most of/if not all your apps should go in here)  
+
+  # Home Manager Configuration (Most of/if not all your apps should go in here)
   home-manager.useGlobalPkgs = true;
   home-manager.users.cody = { pkgs, ... }: {
     home.packages = with pkgs; [
-    
+
     waybar
     swww
     waypaper
     wofi
     kitty
+    foot
+    alacritty
+    swaylock
+    swaybg
+    dmenu
+    wmenu
 
     trilium-desktop
     anki
@@ -186,27 +188,28 @@ in
     go
     prismlauncher-qt5
     wl-clipboard
-    atool 
+    atool
     httpie
-    vim 
+    vim
     emacs-gtk
     floorp
     calibre
     kate
-    neovim
     steam
     spotify
     weylus
     flameshot
     wget
-    
+
     ];
     programs.bash.enable = true;
+    programs.neovim.enable = true;
+    programs.neovim.defaultEditor = true;
+
     # The state version is required and should stay at the version you
     # originally installed.
     home.stateVersion = "23.11";
   };
-
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -214,8 +217,9 @@ in
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    
+
     # These are global packages, change them to user package if they act up.
+    unzip
     git
     gnumake
     python312
@@ -225,7 +229,25 @@ in
     go
     nerdfonts
     rustup
+
   ];
+
+  # Configuring sway
+  programs.sway = {
+    package = pkgs.swayfx;
+    enable = true;
+    extraOptions = [
+      "--unsupported-gpu"
+      "--debug"
+      "--verbose"
+    ];
+    extraSessionCommands = ''
+      export SDL_VIDEODRIVER=wayland
+      export QT_QPA_PLATFORM=wayland-egl
+      export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+      export _JAVA_AWT_WM_NONREPARENTING=1
+    '';
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
