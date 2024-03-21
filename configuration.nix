@@ -39,6 +39,7 @@ in
 
   # Load nvidia driver for Xorg and Wayland
   services.xserver.videoDrivers = ["nvidia"]; # or "nvidiaLegacy470 etc.
+  boot.kernelParams = [ "nvidia.NVreg_PreserveVideoMemoryAllocations=1" ];
 
   hardware.nvidia = {
 
@@ -47,19 +48,18 @@ in
 
     # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
     # Enable this if you have graphical corruption issues or application crashes after waking
-    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead
+    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead 
     # of just the bare essentials.
-    powerManagement.enable = false;
-
+    powerManagement.enable = true;
     # Fine-grained power management. Turns off GPU when not in use.
     # Experimental and only works on modern Nvidia GPUs (Turing or newer).
     powerManagement.finegrained = false;
 
     # Use the NVidia open source kernel module (not to be confused with the
     # independent third-party "nouveau" open source driver).
-    # Support is limited to the Turing and later architectures. Full list of
-    # supported GPUs is at:
-    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus
+    # Support is limited to the Turing and later architectures. Full list of 
+    # supported GPUs is at: 
+    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus 
     # Only available from driver 515.43.04+
     # Currently alpha-quality/buggy, so false is currently the recommended setting.
     open = false;
@@ -70,8 +70,8 @@ in
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
     package = config.boot.kernelPackages.nvidiaPackages.stable;
-  };
-
+  };  
+  
   # END OF NVIDIA ------------------------------------------------------------------------
   # Using Xwayland to make flickering in certain apps due to nvidia go away
   programs.xwayland.enable = true;
@@ -116,7 +116,7 @@ in
   # Enable the KDE Plasma Desktop Environment.
   services.xserver.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
-
+ 
  # Configure keymap in X11
   services.xserver = {
     xkb.layout = "us";
@@ -132,6 +132,7 @@ in
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
+    wireplumber.enable = true;
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
@@ -155,14 +156,14 @@ in
     #  thunderbird
     ];
   };
+  
 
-
-  # Home Manager Configuration (Most of/if not all your apps should go in here)
+  # Home Manager Configuration (Most of/if not all your apps should go in here)  
   home-manager.useGlobalPkgs = true;
   home-manager.users.cody = { pkgs, ... }: {
     home.packages = with pkgs; [
-
-    waybar
+    
+    # Applications for sway or hyprland
     swww
     waypaper
     wofi
@@ -173,7 +174,24 @@ in
     swaybg
     dmenu
     wmenu
+    pavucontrol
 
+    # Useful for sway compatiibility
+    wlroots
+    vulkan-validation-layers
+    wineWowPackages.waylandFull
+    xwaylandvideobridge
+    #
+
+    # Unsorted applications
+    lazarus
+    ghidra
+    wireplumber
+    rar
+    lutris
+    protonup-qt
+    qbittorrent
+    vkd3d-proton
     trilium-desktop
     anki
     cemu-ti
@@ -181,35 +199,34 @@ in
     mesa
     xournalpp
     vimPlugins.nvim-web-devicons
-    clang-tools_17
-    gccgo13
     lunarvim
     nerdfonts
-    go
     prismlauncher-qt5
     wl-clipboard
-    atool
+    atool 
     httpie
-    vim
+    vim 
     emacs-gtk
     floorp
     calibre
     kate
     steam
     spotify
-    weylus
+    gfxtablet
     flameshot
     wget
-
+    
     ];
     programs.bash.enable = true;
     programs.neovim.enable = true;
-    programs.neovim.defaultEditor = true;
+
 
     # The state version is required and should stay at the version you
     # originally installed.
     home.stateVersion = "23.11";
   };
+
+  xdg.portal.wlr.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -217,8 +234,9 @@ in
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-
+    
     # These are global packages, change them to user package if they act up.
+    vscode-fhs
     unzip
     git
     gnumake
@@ -229,6 +247,8 @@ in
     go
     nerdfonts
     rustup
+    gccgo13
+    clang-tools_17
 
   ];
 
@@ -236,17 +256,30 @@ in
   programs.sway = {
     package = pkgs.swayfx;
     enable = true;
-    extraOptions = [
+    extraOptions = [ 
       "--unsupported-gpu"
       "--debug"
       "--verbose"
     ];
     extraSessionCommands = ''
-      export SDL_VIDEODRIVER=wayland
-      export QT_QPA_PLATFORM=wayland-egl
+      
+      export QT_QPA_PLATFORM=wayland
       export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
       export _JAVA_AWT_WM_NONREPARENTING=1
+      export MOZ_ENABLE_WAYLAND=1
+      XDG_CURRENT_DESKTOP=sway
+      export GDK_BACKEND=wayland
     '';
+  };
+
+  # Configuring Hyprland
+  programs.hyprland.enable = true;
+
+  # Configuring Weylus
+  programs.weylus = {
+    enable = true;
+    users = [ "cody" ];
+    openFirewall = true;
   };
 
   # Some programs need SUID wrappers, can be configured further or are
